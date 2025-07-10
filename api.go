@@ -58,44 +58,23 @@ func deleteLibroPorID(c *gin.Context) {
 }
 
 func patchLibroPorID(c *gin.Context) {
-        id := c.Param("id")
-        
-        
-        for i, libro := range libros {
-                if libro.ID == id {
-                        
-                        var actualizacion map[string]interface{}
-                        if err := c.BindJSON(&actualizacion); err != nil {
-                                c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Datos inválidos"})
-                                return
-                        }
-                        
-                
-                        if titulo, existe := actualizacion["titulo"]; existe {
-                                if tituloStr, ok := titulo.(string); ok {
-                                        libros[i].Titulo = tituloStr
-                                }
-                        }
-                        
-                        if autor, existe := actualizacion["autor"]; existe {
-                                if autorStr, ok := autor.(string); ok {
-                                        libros[i].Autor = autorStr
-                                }
-                        }
-                        
-                        if año, existe := actualizacion["año"]; existe {
-                                if añoFloat, ok := año.(float64); ok {
-                                        libros[i].Año = int(añoFloat)
-                                }
-                        }
-                        
-                        c.IndentedJSON(http.StatusOK, libros[i])
-                        return
-                }
-        }
-        c.IndentedJSON(http.StatusNotFound, gin.H{"mensaje": "Libro no encontrado"})
+		id := c.Param("id")
+		var libroActualizado libro
+		if err := c.BindJSON(&libroActualizado); err != nil {
+				c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Datos inválidos"})
+				return
+		}
+		for i, libro := range libros {
+				if libro.ID == id {
+						libros[i].Titulo = libroActualizado.Titulo
+						libros[i].Autor = libroActualizado.Autor
+						libros[i].Año = libroActualizado.Año
+						c.IndentedJSON(http.StatusOK, libros[i])
+						return
+				}
+		}
+		c.IndentedJSON(http.StatusNotFound, gin.H{"mensaje": "Libro no encontrado"})
 }
-
 func main() {
         router := gin.Default()
         router.GET("/libros", getLibros)
